@@ -1,8 +1,8 @@
 # data-structures-and-algorithms
 
-##index
-1.TREES
-    a.insert
+## index
+1.TREES<br/>
+    a.insert<br/>
     b.preorder
     c.inorder
     d.postorder
