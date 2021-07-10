@@ -1,0 +1,460 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define max 100
+struct node
+{
+    int data;
+    struct node *left;
+    struct node *right;
+};
+
+struct stack
+{
+    int elements[max];
+    int top;
+};
+
+struct queue
+{
+    int elements[max];
+    int front;
+    int rear;
+};
+
+void initstack(struct stack *s)
+{
+    s->top=-1;
+}
+
+int isfull(const struct stack *s)
+{
+    return s->top==max-1;
+}
+
+int isempty(struct stack *s)
+{
+    return s->top==-1;
+}
+
+void push(struct stack *s,int e)
+{
+
+        s->top++;
+        s->elements[s->top]=e;
+
+}
+
+int pop(struct stack *s)
+{
+        int d=s->elements[s->top];
+        s->top--;
+        return d;
+}
+int peek(const struct stack *s)
+{
+    return s->elements[s->top];
+}
+
+void initqueue(struct queue *q)
+{
+    q->front=0;
+    q->rear=-1;
+}
+
+int isfullqueue(const struct queue *q)
+{
+    return q->rear==max-1;
+}
+
+int isemptyqueue(const struct queue *q)
+{
+    if(q->front>q->rear)
+        return 1;
+    else
+        return 0;
+}
+
+void enqueue(struct queue *q,int e)
+{
+    q->rear++;
+    q->elements[q->rear]=e;
+}
+
+int dequeue(struct queue *q)
+{
+    int d=q->elements[q->front];
+    q->front++;
+    return d;
+}
+
+struct node *insert(struct node *root,int data)
+{
+    struct node *p=root;
+    p=(struct node *)malloc(sizeof(struct node));
+    p->data=data;
+    p->left=p->right=NULL;
+    if(root == NULL)
+    {
+        root=p;
+        return root;
+    }
+    else
+    {
+        struct node *cur;
+        if(data<root->data)
+        {
+            cur=insert(root->left,data);
+            root->left=cur;
+        }
+        else
+        {
+            cur=insert(root->right,data);
+            root->right=cur;
+
+        }
+        return root;
+    }
+
+}
+
+void preorder(struct node *root)
+{
+    if(root==NULL)
+    {
+        return;
+    }
+    else
+    {
+        printf("%d->",root->data);
+        preorder(root->left);
+        preorder(root->right);
+    }
+}
+
+void inorder(struct node *root)
+{
+    if(root==NULL)
+    {
+        return;
+    }
+    else
+    {
+
+        inorder(root->left);
+        printf("%d->",root->data);
+        inorder(root->right);
+    }
+}
+
+void postorder(struct node *root)
+{
+    if(root==NULL)
+    {
+        return;
+    }
+    else
+    {
+
+        postorder(root->left);
+        postorder(root->right);
+        printf("%d->",root->data);
+    }
+}
+
+int height(struct node *root)
+{
+    if(root==NULL)
+        return 0;
+    int L=height(root->left);
+    int R=height(root->right);
+    if(L>R)
+        return L+1;
+    else
+        return R+1;
+}
+
+int diameter(struct node *root,int *p)
+{
+    if(root==NULL)
+        return 0;
+
+    int L=diameter(root->left,p);
+    int R=diameter(root->right,p);
+    int sum=L+R+1;
+
+    if(*p<sum)
+        *p=sum;
+
+    int c;
+    c=L>R? 1+L:1+R;
+    return c;
+}
+
+void sumofeachlevel(struct node *root)
+{
+    struct node *u;int sum=0;
+    struct queue q;
+    initqueue(&q);
+    enqueue(&q,root);
+    enqueue(&q,NULL);
+    while(!isemptyqueue(&q))
+    {
+        u=dequeue(&q);
+        if(u!=NULL)
+        {
+             sum=sum+u->data;
+            if(u->left)
+                enqueue(&q,u->left);
+            if(u->right)
+                enqueue(&q,u->right);
+        }
+        else
+        {
+            if(sum!=0)
+            {
+               printf("sum :%d\n",sum);
+            }
+            sum=0;
+            enqueue(&q,NULL);
+        }
+    }
+}
+
+int sum(struct node* root)
+{
+    if(root==NULL || (root->left==NULL && root->right==NULL))
+    {
+        return 0;
+    }
+    else
+    {
+        return (root->data+sum(root->left)+sum(root->right));
+    }
+    return 0;
+}
+
+int countnodes(struct node *root)
+{
+    if(root==NULL)
+    {
+        return 0;
+    }
+
+    else
+    {
+        int L=countnodes(root->left);
+        int R=countnodes(root->right);
+        return L+R+1;
+    }
+
+}
+
+int deletekey(struct node **root,int key)
+{
+   struct node *cur=*root;
+   struct node *par=NULL;
+   while(cur && cur->data!=key)
+   {
+       par=cur;
+       if(key<cur->data)
+            cur=cur->left;
+       else
+            cur=cur->right;
+   }
+   if(cur==NULL)
+   {
+       return 0;
+   }
+   else
+   {
+       if(cur->left == NULL && cur->right == NULL)
+       {
+           if(*root == cur)
+           {
+               *root=cur;
+           }
+           else if(par->right==cur)
+                par->right=NULL;
+
+           else if(par->left==cur)
+                par->left=NULL;
+
+           free(cur);
+       }
+
+       else if((cur->left!=NULL && cur->right == NULL) || (cur->left==NULL && cur->right !=NULL))
+       {
+           if(*root==cur)
+           {
+               if(cur->left)
+                *root=cur->left;
+
+               else if(cur->right)
+                *root=cur->right;
+
+                free(cur);
+           }
+
+           else if(par->right==cur)
+           {
+               if(cur->right)
+                    par->right=cur->right;
+
+               else if(cur->left)
+                    par->right=cur->left;
+
+                free(cur);
+           }
+           else if(par->left==cur)
+           {
+               if(cur->right)
+                    par->left=cur->right;
+
+               else if(cur->left)
+                    par->left=cur->left;
+
+                free(cur);
+           }
+       }
+
+       else if(cur->left && cur->right)
+       {
+           struct node *in =cur->right;
+           struct node *temp=NULL;
+           while(in->left!=NULL)
+           {
+               temp=in;
+               in=in->left;
+           }
+
+           if(temp!=NULL)
+           {
+               temp->left=in->right;
+           }
+           in->left=cur->left;
+
+           if(in!=cur->right)
+           {
+               in->right=cur->right;
+           }
+
+           if(*root==cur)
+           {
+               *root=in;
+               free(cur);
+
+           }
+           else if(par->right==cur)
+           {
+               par->right=in;
+               free(cur);
+           }
+           else if(par->left==cur)
+           {
+               par->left=in;
+               free(cur);
+           }
+       }
+   }
+   return 1;
+
+}
+
+int search(struct node *root,int key)
+{
+    if(root==NULL)
+        return 0;
+    else
+    {
+        if(key <root->data)
+        {
+            search(root->left,key);
+        }
+        else if(key>root->data)
+        {
+            search(root->right,key);
+        }
+        else if(key==root->data)
+        {
+            printf("%d is found in tree",key);
+            return 1;
+        }
+        else
+        {
+            printf("%d is not found in tree",key);
+            return;
+        }
+    }
+}
+int main()
+{
+
+    struct node* root = NULL;
+    int t,h,d,*p,n,s=0,c=0,key,m,e;
+    int data;
+    while(1)
+    {
+        printf("\nEnter \n1.Insert\n2.pre-order\n3.in-order\n4.post-order\n5.Height\n6.Diameter\n7.sum_of_each_level\n8.sum(non-terminal nodes)\n9.count_nodes\n10.delete-key\n11.search\n12.exit\n");
+        scanf("%d",&n);
+        switch(n)
+        {
+            case 1: printf("Enter element to be inserted : ");
+                    scanf("%d",&data);
+                    root = insert(root,data);
+                    break;
+
+            case 2: preorder(root);
+                    break;
+
+            case 3: inorder(root);
+                    break;
+
+            case 4: postorder(root);
+                    break;
+
+            case 5: h= height(root);
+                     printf("height of BST : %d",h);
+                     break;
+
+            case 6 : d=diameter(root,&p);
+                     printf("diameter of BST : %d",d);
+                     break;
+
+            case 7 : sumofeachlevel(root);
+                     break;
+
+            case 8 : s=sum(root);
+                     printf("sum of non terminal nodes: %d",s);
+                     break;
+
+            case 9 : c=countnodes(root);
+                     printf(" count total nodes :%d\n",c);
+                     break;
+
+            case 10 : printf("enter the key to be deleted : ");
+                     scanf("%d",&key);
+                     m=deletekey(&root,key);
+                     if(m==1)
+                     {
+                         printf("%d is deleted",key);
+                     }
+                     else
+                     {
+                         printf("%d is not found in tree",key);
+                     }
+                     break;
+
+            case 11: printf("enter the element to be searched : ");
+                     scanf("%d",&e);
+                     int q=search(root,e);
+                     if(q==0)
+                     {
+                         printf("%d is not found in tree: ",e);
+                     }
+
+                     break;
+            case 12: exit(1);
+     }
+   }
+  return 0;
+}
